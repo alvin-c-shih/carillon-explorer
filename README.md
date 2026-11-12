@@ -33,6 +33,11 @@ cards (streamed from Wikimedia Commons when a card is opened) and the links out 
 
 The three build tools need a connection; the app does not. `DECISIONS.md` records the design direction.
 
+## Licence
+
+The project's own code and text are under the Apache License 2.0: see `LICENSE` and `NOTICE`. Material from others
+keeps its own licence, listed below.
+
 ## Sources and licences
 
 - **three.js** 0.170.0, MIT licence (bundled in `vendor/three.bundle.js`, licence notices kept).

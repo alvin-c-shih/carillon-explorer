@@ -1,0 +1,16 @@
+Carillon Explorer
+Copyright 2026 Alvin Shih
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+That licence covers this project's own code and text. The following material in this repository comes from
+others and stays under its own terms:
+
+- vendor/three.bundle.js: three.js, MIT licence (notices are kept inside the file).
+- world.js: text from Wikipedia's lists of carillons, CC BY-SA 4.0; positions from OpenStreetMap's Nominatim, ODbL.
+- sites/: map data (c) OpenStreetMap contributors, ODbL.
+- vendor/countries.js: world-atlas, from Natural Earth, public domain.
+- vendor/earth.js: Earth photo from the three.js examples (NASA imagery).
+
+Photos and recordings shown in the app are not in this repository. They are streamed from Wikimedia Commons and
+shown with their own authors and licences.
