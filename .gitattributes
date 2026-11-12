@@ -1,0 +1,2 @@
+# Keep Unix line endings everywhere, whatever the machine is set to
+* text=auto eol=lf

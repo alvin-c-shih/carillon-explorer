@@ -1,0 +1,5 @@
+# Downloaded pages and geocoding answers kept by tools/build_world.py so a rebuild is quick; safe to delete
+tools/cache/
+tools/__pycache__/
+node_modules/
+.DS_Store
