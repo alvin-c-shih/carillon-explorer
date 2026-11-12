@@ -145,7 +145,7 @@ window.createAtlas = function ({ THREE, OrbitControls, canvas, data, onSelect, c
   /* ── Camera ── */
   const controls = new OrbitControls(camera, canvas);
   controls.enablePan = false; controls.enableDamping = true; controls.dampingFactor = 0.2;   // short glide of its own; a flick adds the long spin below
-  controls.minDistance = R + 0.6; controls.maxDistance = 48;
+  controls.minDistance = R + 0.6; controls.maxDistance = 75;
   controls.autoRotate = !calm(); controls.autoRotateSpeed = 0.35; controls.enabled = false;
   controls.addEventListener('start', () => { controls.autoRotate = false; });
 
@@ -155,8 +155,10 @@ window.createAtlas = function ({ THREE, OrbitControls, canvas, data, onSelect, c
   const look = new THREE.Vector3(), homeDir = camera.position.clone().normalize();
   const to = { pos: new THREE.Vector3(), up: new THREE.Vector3(), look: new THREE.Vector3() };
 
+  const narrow = () => Math.max(1, 0.85 / camera.aspect);   // on a tall, narrow screen the whole globe needs more distance
+  let framed = false;
   function targetPose() {
-    if (sel < 0) { to.pos.copy(homeDir).multiplyScalar(homeDist); to.up.copy(Y); to.look.set(0, 0, 0); return; }
+    if (sel < 0) { to.pos.copy(homeDir).multiplyScalar(homeDist * narrow()); to.up.copy(Y); to.look.set(0, 0, 0); return; }
     const m = marks[sel], ce = Math.cos(drone.el) * drone.dist;
     to.pos.copy(m.P).addScaledVector(m.n, Math.sin(drone.el) * drone.dist)
       .addScaledVector(m.e, ce * Math.cos(drone.az)).addScaledVector(m.north, ce * Math.sin(drone.az));
@@ -309,7 +311,7 @@ window.createAtlas = function ({ THREE, OrbitControls, canvas, data, onSelect, c
         if (Math.abs(o.x - l.x) < 190 && l.y - o.y < 22) l.y = o.y + 22;
       }
       l.m.el.style.left = l.x + 'px'; l.m.el.style.top = l.y + 'px';
-      l.m.el.classList.toggle('flip', l.x > w * 0.55);   // near the right edge, open to the left
+      l.m.el.classList.toggle('flip', l.x > w * (w < 820 ? 0.38 : 0.55));   // near the right edge, open to the left
     });
   }
 
@@ -385,6 +387,7 @@ window.createAtlas = function ({ THREE, OrbitControls, canvas, data, onSelect, c
 
   function setActive(on) {
     active = on; hover = -1; down = null; ptrs.clear();
+    if (on && !framed) { framed = true; if (sel < 0 && !trans) camera.position.setLength(HOME * narrow()); }   // first look: fit the globe to this screen's shape
     controls.enabled = on && sel < 0 && !trans;
     labelsEl.style.display = on ? '' : 'none';
   }

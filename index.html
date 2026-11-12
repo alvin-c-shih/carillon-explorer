@@ -205,53 +205,12 @@
   #panel, #kbwrap { z-index: 3; }   /* panels sit above the labels drawn over the scene */
   #tools { z-index: 4; }
   #more { display: contents; }
-  #moreBtn, #fold { display: none; }
+  #moreBtn, #fold, #tabbar, #playNote, .phoneonly { display: none; }
   button, .key, a.btn { touch-action: manipulation; }   /* no double-tap zoom on controls */
   #nav button { white-space: nowrap; }
   #labels div.flip, #atlasLabels div.flip { transform: translate(calc(-100% - 8px), -50%); }   /* a label near the right edge opens to the left */
   #labels div.flip::before, #atlasLabels div.flip::before { left: auto; right: -12px; }
 
-  /* Compact screens (a phone either way up): the extra controls fold into a menu, and the guide panel can be folded */
-  @media (max-width: 820px), (max-height: 500px) {
-    #tools { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; left: calc(16px + var(--sl)); pointer-events: none; }
-    #tools > * { pointer-events: auto; }
-    #tools .btn, #vol { padding: 6px 11px; font-size: 13px; }
-    #moreBtn { display: block; min-width: 40px; }
-    #more { display: none; flex-basis: 100%; flex-wrap: wrap; justify-content: flex-end; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
-    #more.on { display: flex; }
-    #tunePop { flex-basis: 100%; width: auto; }
-    #chip { flex-basis: 100%; max-width: none; font-size: 13px; }
-    #vol input { width: 90px; }
-    #fold { display: block; position: absolute; top: 10px; right: 10px; padding: 2px 10px; }
-    #panel.min { bottom: auto !important; max-height: none; }
-    #panel.min #body { display: none; }
-    #panel.min #nav { border-top: 0; padding-top: 4px; }
-    #panel h1 { padding-right: 40px; }
-    #pedcap { display: none; }
-    #body .intro { display: none; }
-    #dots button { width: 16px; }
-  }
-  /* A phone held upright: the guide across the top, controls just above the batons, and batons wide enough to tap */
-  @media (max-width: 820px) {
-    #panel { right: calc(16px + var(--sr)); width: auto; bottom: auto; max-height: 38vh; padding: 14px 16px 12px; }
-    #panel h1 { font-size: 21px; }
-    body.atlas #panel { bottom: auto; max-height: 50vh; }
-    body.song #panel { bottom: auto; max-height: 26vh; }
-    .photo img { height: 110px; }
-    #tools { top: auto; bottom: calc(var(--kbh) + 24px + var(--sb)); }
-    body.song #tools { bottom: calc(var(--kbh) + var(--lane) + 24px + var(--sb)); }
-    body.atlas #tools { bottom: calc(16px + var(--sb)); }
-    #more, #tunePop, #chip { order: -1; }   /* menus open above the row of buttons */
-    #atlasHint { left: 50%; bottom: calc(64px + var(--sb)); font-size: 12px; }
-    .key i { display: none; }
-    /* The batons are 2.3 screens wide and scroll sideways; the falling-note lane sits inside the same scroller */
-    #kbwrap { padding: 10px 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
-    #kbwrap::-webkit-scrollbar { display: none; }
-    #kb { width: 230%; max-width: none; margin: 0 12px; height: calc(var(--kbh) - 22px); }
-    #kb, #kb .key { touch-action: pan-x; }
-    body.song #kbwrap { height: calc(var(--kbh) + var(--lane)); padding-top: calc(10px + var(--lane)); }
-    #lane { background: none; }
-  }
   @media (max-height: 700px) {
     :root { --kbh: 128px; --lane: 92px; }
     html, body { font-size: 14px; }
@@ -261,15 +220,91 @@
     button.btn, a.btn { padding: 5px 11px; }
     .photo img { height: 150px; }
   }
-  /* A phone held on its side: short, so everything shrinks a little */
-  @media (max-height: 500px) {
+  /* ───── A phone held upright ─────
+     Laid out the way phone apps are: a tab bar along the bottom (Tour, Play, Globe), a sheet that pulls up from
+     the bottom for reading, the scene above it, and a few small controls in the top corner. */
+  @media (max-width: 820px) {
+    :root { --tab: 58px; }
+    .wideonly { display: none; }
+    .phoneonly { display: inline; }
+
+    #tabbar { display: grid; grid-template-columns: repeat(3, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+      height: calc(var(--tab) + var(--sb)); padding: 0 var(--sr) var(--sb) var(--sl); background: #141820; border-top: 1px solid var(--line); }
+    #tabbar button { font: inherit; font-size: 11px; color: var(--ink-dim); background: none; border: 0; cursor: pointer;
+      display: grid; justify-items: center; align-content: center; gap: 3px; }
+    #tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    #tabbar button[aria-current="page"] { color: var(--bronze); }
+
+    /* The guide is a bottom sheet with three heights: peek (title and Back / Next), half, and full */
+    #panel { left: 0; right: 0; top: auto; bottom: calc(var(--tab) + var(--sb)); width: auto; height: 44vh; max-height: none;
+      border-radius: 18px 18px 0 0; border-width: 1px 0 0; padding: 0 16px 10px; transition: height .25s ease; }
+    body.atlas #panel, body.song #panel { bottom: calc(var(--tab) + var(--sb)); }
+    #panel.peek { height: 138px; }
+    #panel.peek #body { display: none; }
+    #panel.peek #nav { border-top: 0; padding-top: 2px; }
+    #panel.full { height: calc(100vh - var(--tab) - var(--sb) - var(--st) - 60px); height: calc(100dvh - var(--tab) - var(--sb) - var(--st) - 60px); }
+    body.play #panel { display: none; }
+    #fold { display: block; flex: none; width: 100%; height: 26px; padding: 0; border: 0; background: none; font-size: 0; cursor: grab; touch-action: none; }
+    #fold::before { content: ""; display: block; width: 44px; height: 5px; border-radius: 3px; background: rgba(243,236,223,.45); margin: 0 auto; }
+    #panel h1 { font-size: 21px; margin: 2px 0 8px; }
+    #nav { padding-top: 10px; }
+    #dots button { width: 16px; }
+    #body .intro { display: none; }
+    .photo img { height: 120px; }
+
+    /* Controls for the scene, top right; the tune button, top left, only on the Play tab */
+    #tools { top: calc(10px + var(--st)); left: calc(10px + var(--sl)); right: calc(10px + var(--sr)); flex-direction: row; flex-wrap: wrap;
+      justify-content: flex-end; align-items: center; gap: 6px; pointer-events: none; }
+    #tools > * { pointer-events: auto; }
+    #tools .btn, #vol { padding: 7px 12px; font-size: 13px; }
+    #atlasBtn, #tunesBtn { display: none; }
+    body.play #tunesBtn { display: block; margin-right: auto; }
+    #moreBtn { display: block; min-width: 42px; }
+    #more { display: none; order: 5; flex-basis: 100%; flex-wrap: wrap; justify-content: flex-end; gap: 6px;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+    #more.on { display: flex; }
+    #tunePop { order: 6; flex-basis: 100%; width: auto; }
+    #chip { order: 7; flex-basis: 100%; max-width: none; font-size: 13px; }
+    #vol input { width: 90px; }
+    #atlasHint { left: 50%; top: calc(58px + var(--st)); bottom: auto; font-size: 12px; }
+
+    /* The batons live on the Play tab: wide enough to tap, scrolling sideways, with the falling notes inside the same strip */
+    #kbwrap { display: none; left: 0; right: 0; bottom: calc(var(--tab) + var(--sb)); border-radius: 18px 18px 0 0; border-width: 1px 0 0;
+      padding: 10px 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+    #kbwrap::-webkit-scrollbar { display: none; }
+    body.play #kbwrap { display: block; }
+    #kb { width: 230%; max-width: none; margin: 0 12px; height: calc(var(--kbh) - 22px); }
+    #kb, #kb .key { touch-action: pan-x; }
+    body.song #kbwrap { height: calc(var(--kbh) + var(--lane)); padding-top: calc(10px + var(--lane)); }
+    #lane { background: none; }
+    .key i, #pedcap { display: none; }
+    body.play #playNote:not(:empty) { display: block; position: fixed; z-index: 3; left: 12px; right: 12px; bottom: calc(var(--tab) + var(--sb) + var(--kbh) + 8px);
+      background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 6px 12px; font-size: 13px; color: var(--ink-dim); }
+    body.play.song #playNote:not(:empty) { bottom: calc(var(--tab) + var(--sb) + var(--kbh) + var(--lane) + 8px); }
+  }
+  /* ───── A phone held on its side ─────
+     Too short for a sheet, so it keeps the desktop arrangement in miniature: guide on the left (foldable), the
+     batons along the bottom, and the less-used controls behind a menu button in the top right corner. */
+  @media (max-height: 500px) and (min-width: 821px) {
     :root { --kbh: 108px; --lane: 70px; }
     #panel { width: 300px; padding: 10px 14px 8px; }
-    #panel h1 { font-size: 18px; margin: 2px 0 6px; }
+    #panel h1 { font-size: 18px; margin: 2px 0 6px; padding-right: 40px; }
     #nav { padding-top: 6px; }
-    #more { order: 1; }
-    #tools { left: auto; max-width: 430px; }   /* stay in the corner, clear of the guide panel */
-    .key i { display: none; }
+    #fold { display: block; position: absolute; top: 10px; right: 10px; padding: 2px 10px; }
+    #panel.min { bottom: auto !important; }
+    #panel.min #body { display: none; }
+    #panel.min #nav { border-top: 0; padding-top: 4px; }
+    #tools { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; max-width: 520px; pointer-events: none; }
+    #tools > * { pointer-events: auto; }
+    #tools .btn, #vol { padding: 6px 11px; font-size: 13px; }
+    #moreBtn { display: block; min-width: 40px; }
+    #more { display: none; order: 5; flex-basis: 100%; flex-wrap: wrap; justify-content: flex-end; gap: 6px;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+    #more.on { display: flex; }
+    #tunePop { order: 6; flex-basis: 100%; width: auto; }
+    #chip { order: 7; flex-basis: 100%; max-width: none; font-size: 13px; }
+    #body .intro, #pedcap, .key i { display: none; }
+    #dots button { width: 16px; }
   }
 </style>
 </head>
@@ -280,7 +315,7 @@
 <div id="atlasHint">Drag to spin · Scroll to zoom · Click a tower to fly there</div>
 
 <aside id="panel" aria-label="Guide">
-  <button class="btn" id="fold" aria-expanded="true" aria-controls="body" aria-label="Hide the text">▴</button>
+  <button class="btn" id="fold" aria-controls="body" aria-label="Resize the guide">▴</button>
   <div id="eyebrow"></div>
   <h1 id="title" tabindex="-1"></h1>
   <div id="body"></div>
@@ -295,10 +330,10 @@
   <button class="btn primary" id="tunesBtn" aria-expanded="false">♪ Play a tune</button>
   <div id="tunePop"></div>
   <button class="btn" id="atlasBtn">World atlas</button>
-  <button class="btn" id="moreBtn" aria-expanded="false" aria-controls="more" aria-label="More controls">☰</button>
+  <button class="btn" id="xray" aria-pressed="false">See inside</button>
+  <button class="btn" id="recenter">Reset view</button>
+  <button class="btn" id="moreBtn" aria-expanded="false" aria-controls="more" aria-label="Settings: link, motion and sound">⋯</button>
   <div id="more">
-    <button class="btn" id="xray" aria-pressed="false">See inside</button>
-    <button class="btn" id="recenter">Reset view</button>
     <button class="btn" id="share">Copy link</button>
     <button class="btn" id="motion" title="Flights between views and the slow circling of the camera">Motion: on</button>
     <label class="btn" id="vol">Sound <input type="range" id="volume" min="0" max="100" value="100" aria-label="Volume"></label>
@@ -307,18 +342,24 @@
 </div>
 
 <div id="labels" aria-hidden="true"></div>
+<div id="playNote" aria-live="polite"></div>
+<nav id="tabbar" aria-label="Sections">
+  <button data-go="tour" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21V9l3-6 3 6v12M6 21h12M10.5 13h3M10.5 17h3"/></svg>Tour</button>
+  <button data-go="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10l2 11H5L7 4zM12 15v3M9 20h6"/><circle cx="12" cy="19" r="1.3"/></svg>Play</button>
+  <button data-go="globe"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>Globe</button>
+</nav>
 
 <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lbTitle"><figure><img alt=""><figcaption><h2 id="lbTitle"></h2><p></p><a target="_blank" rel="noopener"></a><button class="btn" id="lbClose">Close</button></figcaption></figure></div>
 
 <div id="kbwrap"><div id="kb" role="group" aria-label="Baton keyboard and pedals. Arrow keys move between batons, down arrow reaches the pedals, Enter or Space strikes."><div id="pedcap"><span>◀ Pedals: the low bells again, for the feet (Shift + key)</span><button class="btn" id="typing" aria-pressed="true" title="When on, typing letters and digits plays the bells">Typing plays bells: on</button></div></div></div>
 
-<script src="vendor/three.bundle.js"></script>
-<script src="vendor/earth.js"></script>
-<script src="vendor/countries.js"></script>
-<script src="carillons.js"></script>
-<script src="world.js"></script>
-<script src="atlas.js"></script>
-<script src="site.js"></script>
-<script src="main.js"></script>
+<script src="vendor/three.bundle.js?v=cc75c72d"></script>
+<script src="vendor/earth.js?v=89e452db"></script>
+<script src="vendor/countries.js?v=9fb5e31c"></script>
+<script src="carillons.js?v=614367f8"></script>
+<script src="world.js?v=f65dc0f2"></script>
+<script src="atlas.js?v=bcfdff2a"></script>
+<script src="site.js?v=6cf24246"></script>
+<script src="main.js?v=fce6a1c6"></script>
 </body>
 </html>

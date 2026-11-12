@@ -156,23 +156,33 @@ Lighthouse), and colour contrast of text over the 3D scene.
 
 ## 9. Phone layout
 
-Emulate an iPhone 16: 393 × 760 upright (the space left by Safari's bars) and 852 × 393 on its side. Reload after
-resizing. On a compact screen the extra controls fold into a ☰ menu and the guide panel has a fold button.
+Emulate an iPhone 16: 393 × 760 upright (the space left by Safari's bars) and 852 × 393 on its side.
+
+Upright, the app is laid out like a phone app: a tab bar along the bottom (Tour, Play, Globe), the guide as a
+sheet that pulls up from the bottom, the scene above it, and scene controls in the top right corner.
 
 | Check | How | Pass |
 |---|---|---|
-| Controls | Upright, tower | One row above the batons: Play a tune, World atlas, ☰. Nothing overlaps the guide panel or the batons |
-| Menu | Tap ☰ | See inside, Reset view, Copy link, Motion and Sound appear in a box above the row; See inside and Reset view close it |
-| Fold | Tap the arrow at the panel's top right | The panel shrinks to its title and Back / Next; the scene re-centres in the freed space |
-| Batons | Upright | Each natural baton is at least 30 px wide; the strip scrolls sideways and starts at C4 |
-| Play along | Start one upright | The lane of falling notes sits inside the baton panel; notes carry note names, not keyboard letters; the wanted baton scrolls into view |
-| Labels | Stop 3 and a carillon card | Labels near the right edge open to the left; none are cut off; at most five on the globe; none drawn over a panel |
-| Globe | Upright | Tabs, search, pickers and legend fit the width; the hint line sits above the control row |
-| On its side | 852 × 393, tower and globe | Guide on the left, controls in the top right corner, the ☰ box stays clear of the guide |
-| Desktop unchanged | 1280 × 800 | No ☰ and no fold button; controls in a column on the right; batons do not scroll |
+| Tabs | Tap Tour, Play, Globe | Tour: sheet with the stop's text. Play: batons along the bottom, "Play a tune" top left, no sheet. Globe: sheet with the atlas. The current tab is bronze |
+| Tabs follow the app | From a tour stop, press a "visit" link; start a play-along from stop 8; start the Echo game | The tab bar moves to Globe, Play, Play |
+| Sheet by tap | Tap the handle | Half ↔ peek (peek shows the title and Back / Next only) |
+| Sheet by drag | Drag the handle up, then down | Snaps to full, half or peek; the scene re-centres in the space above |
+| Sheet by itself | Tap a tower while the sheet is at peek; open a 3D close-up | The card rises to half; the close-up drops the sheet to peek |
+| Top controls | Look at the top right | See inside (tower only), Reset view, ⋯. The ⋯ box holds Copy link, Motion and Sound |
+| Batons | Play tab | Each natural baton at least 30 px wide; the strip scrolls sideways and starts at C4 |
+| Play along | Start one | Falling notes sit inside the baton strip with note names; the wanted baton scrolls into view; a status line sits just above the strip |
+| Labels | Stop 3 and a carillon card | Labels near the right edge open leftwards; none cut off; at most five on the globe; none over the sheet |
+| Fit | Globe tab; a 3D close-up | The whole globe fits the width; the highlighted tower is not cropped |
+| On its side | 852 × 393 | Desktop arrangement in miniature: guide on the left with a fold arrow, batons below, ☰-style ⋯ menu in the top right |
+| Live resize | Load at 1280 × 800, then resize to 393 × 760 **without reloading**, and back | The layout switches both ways; no leftover menus; desktop shows no tab bar, no ⋯ and no handle |
 
 Not possible in emulation: real touch (drag, pinch, flick), Safari's moving toolbars, the notch and home bar
 insets, and sound with the ring switch set to silent.
+
+**Stale code on a real device.** A phone that has visited before may hold old files. `index.html` names every
+script with a fingerprint (`main.js?v=…`), so a fresh page always gets matching code, but GitHub Pages lets
+browsers keep the page itself for up to ten minutes. If a new control "does nothing", reload after a few minutes
+before debugging. Run `node tools/stamp.mjs` before each commit that changes a script.
 
 ## 10. Performance
 

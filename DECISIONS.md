@@ -167,7 +167,41 @@ where the exact words were not kept, the request is paraphrased and marked so.
 - **Became:** three.js, the Earth photo and the country outlines are local files in `vendor/`. Photos, recordings
   and links out still need a connection and fail quietly without one.
 
+## 20. Accessibility and a test plan
+
+> Oh. Please add accessibility. Please document a test plan for future agent.
+
+- **Became:** keyboard control of the 3D views and batons, scene descriptions and announcements for screen readers,
+  focus that follows the content, a switch for the single-letter shortcuts, and `TESTING.md`.
+
+## 21. Publish, check in, licence
+
+> Make it viewable on github.io .
+> Then check in.
+>
+> Add Apache 2.0 license.
+
+- **Became:** a public repository served by GitHub Pages; Apache 2.0 for the project's own code, with third-party
+  terms listed in `NOTICE`.
+
+## 22. The phone is a first-class screen
+
+> Looks pretty cramped on the phone. Can you review the whole site as though it's on an iPhone 16?
+>
+> Hamburger and fold buttons don't work for me on the iPhone. Resizing the window to be portrait shaped doesn't
+> update the controls for that mode.
+> I don't expect hamburger to be lower right. Please reimagine the whole interface so that it's more intuitive to a
+> phone user.
+
+- **First attempt (rejected):** the desktop layout squeezed down, with a menu button at the lower right and a fold
+  arrow on the panel.
+- **Became:** a phone layout built on phone conventions. A tab bar along the bottom (Tour, Play, Globe); the guide
+  as a sheet that is tapped or dragged between peek, half and full; scene controls and a ⋯ settings menu in the
+  top right; batons on their own Play tab, wide enough to tap.
+- **Principles:** follow the platform's conventions instead of shrinking the desktop; the layout must follow the
+  window as it is resized, with no reload; and a new page must never run against old code, so scripts carry a
+  fingerprint in their name.
+
 ## Asked for and not yet done
 
-- A code quality and security review before check-in. It was requested and then interrupted in favour of the
-  local-only work.
+Nothing outstanding. The code review asked for earlier was done before check-in.

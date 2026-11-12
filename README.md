@@ -31,6 +31,9 @@ cards (streamed from Wikimedia Commons when a card is opened) and the links out 
 | `sites/*.js` | Map data around each featured tower | No: `node tools/fetch-sites.mjs` |
 | `vendor/*` | three.js, the Earth photo, country outlines | No: `node tools/build-vendor.mjs` |
 
+After changing any script, run `node tools/stamp.mjs`. It updates the fingerprints on the script names in
+`index.html`, so browsers never run an old script against a new page.
+
 The three build tools need a connection; the app does not. `DECISIONS.md` records the design direction.
 
 ## Licence

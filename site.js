@@ -244,8 +244,9 @@ window.createSite = function ({ THREE, canvas, calm }) {
   function update(now) {
     const dt = Math.min(0.1, (now - last) / 1000); last = now;
     if (!calm() && !down && now - drone.touched > 2500) drone.az += dt * 0.12;   // the slow circle
-    const ce = Math.cos(drone.el) * drone.dist;
-    camera.position.set(target.x + ce * Math.cos(drone.az), target.y + Math.sin(drone.el) * drone.dist, target.z + ce * Math.sin(drone.az));
+    const far = drone.dist * Math.max(1, 0.9 / camera.aspect);   // stand further back on a tall, narrow screen
+    const ce = Math.cos(drone.el) * far;
+    camera.position.set(target.x + ce * Math.cos(drone.az), target.y + Math.sin(drone.el) * far, target.z + ce * Math.sin(drone.az));
     camera.position.y = Math.max(3, camera.position.y);
     camera.lookAt(target);
   }

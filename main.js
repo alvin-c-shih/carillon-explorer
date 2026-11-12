@@ -702,6 +702,7 @@ function stopTune() {
   lane.replaceChildren(); document.body.classList.remove('song'); layout();
 }
 function startSong(id, along) {
+  if (along) enterPlay();   // on a phone, playing along needs the batons
   stopTune(); audio(); game = null;
   const ev = TUNES[id].ev().sort((a, b) => a.t - b.t);
   song = { id, along, ev, pos: -1.6, last: performance.now(), hitT: -1, slips: 0, want: null };
@@ -749,7 +750,7 @@ function songStrike(i) {   // the player struck bell i during a play-along
 
 const GAME_NOTES = [12, 14, 16, 17, 19, 21, 23, 24];   // the white batons C4–C5
 let game = null;
-const gameStatus = (t) => { for (const id of ['game', 'tuneNote']) { const el = document.getElementById(id); if (el) el.textContent = t; } };
+const gameStatus = (t) => { for (const id of ['game', 'tuneNote', 'playNote']) { const el = document.getElementById(id); if (el) el.textContent = t; } };
 function gameRound() {
   const g = game;
   g.seq.push(GAME_NOTES[Math.floor(Math.random() * GAME_NOTES.length)]); g.pos = 0; g.listening = false;
@@ -760,7 +761,7 @@ function gameRound() {
     if (game === g) { g.listening = true; gameStatus(`Round ${g.seq.length}: your turn. Play it back.`); }
   }, 700 + g.seq.length * 650));
 }
-function gameStart() { game = { seq: [], pos: 0, listening: false }; gameRound(); }
+function gameStart() { enterPlay(); game = { seq: [], pos: 0, listening: false }; gameRound(); }
 
 // Everything the user plays goes through here
 function userPlay(i, vel = 0.85) {
@@ -898,7 +899,7 @@ const STOPS = [
 <p>The bells are bolted in place and never swing. Only the clappers inside them move.</p>
 <p>The instrument grew out of clock chimes in the Low Countries in the 1500s. <button class="btn link" data-visit="Belfry of Bruges">See one of those towers: Bruges</button></p>
 <p><a class="btn" href="${WATCH}" target="_blank" rel="noopener">▶ Watch a real one played and explained: Rob Scallon at the University of Chicago ↗</a></p>
-<p class="try">Drag to look around, scroll to zoom. By keyboard: Tab to the scene, then the arrow keys turn it and <kbd>+</kbd> <kbd>−</kbd> zoom. Next flies you inside; click the scene to skip a flight. This tower is stylised, not a real one.</p>`,
+<p class="try"><span class="wideonly">Drag to look around, scroll to zoom. By keyboard: Tab to the scene, then the arrow keys turn it and <kbd>+</kbd> <kbd>−</kbd> zoom. Next flies you inside; click the scene to skip a flight.</span><span class="phoneonly">Drag to look around, pinch to zoom. Pull this sheet up or down by its handle. Next flies you inside; the Play tab has the batons.</span> This tower is stylised, not a real one.</p>`,
   },
   {
     title: 'The climb',
@@ -910,7 +911,7 @@ const STOPS = [
   {
     title: 'The playing cabin',
     pos: [2.7, CABIN_Y + 2.5, 1.5], target: [0, CABIN_Y + 0.8, -0.3], xray: 0, labels: 'cabin',   // from the player's right and above, so the body does not hide the batons
-    html: `<p class="try">Play the batons below. Drag across them, or type <kbd>Z</kbd>–<kbd>M</kbd> and <kbd>Q</kbd>–<kbd>P</kbd>.</p>
+    html: `<p class="try"><span class="wideonly">Play the batons below. Drag across them, or type <kbd>Z</kbd>–<kbd>M</kbd> and <kbd>Q</kbd>–<kbd>P</kbd>.</span><span class="phoneonly">Tap Play at the bottom of the screen to try the batons yourself.</span></p>
 <p>The keys are wooden <b>batons</b>, struck with loosely closed fists. Lower row: naturals. Upper row: sharps and flats.</p>
 <p>The <b>pedals</b> are wired to the same bells as the lowest batons, here C3 to F4, so the feet can carry the bass while the fists play above. Press a pedal and its baton dips too. Hold <kbd>Shift</kbd> with a key to use the pedal.</p>
 <p>Nothing is electric. Hit harder and the bell rings louder.</p>
@@ -996,6 +997,15 @@ const moreCheck = () => {
   for (const a of b.querySelectorAll('a[target="_blank"]:not([data-told])')) { a.dataset.told = 1; a.insertAdjacentHTML('beforeend', '<span class="sr"> (opens in a new tab)</span>'); }
   for (const d of b.querySelectorAll('.dot:not([aria-hidden]), .meter i:not([aria-hidden])')) d.setAttribute('aria-hidden', 'true');
 };
+// The upright-phone layout applies below this width (the same number as in the styles)
+function upright() { return innerWidth <= 820; }
+function sheetAt() { return panel.classList.contains('peek') ? 'peek' : panel.classList.contains('full') ? 'full' : 'half'; }
+function enterPlay() {   // on an upright phone the batons are on the Play tab
+  if (!upright() || document.body.classList.contains('play')) return;
+  document.body.classList.add('play'); syncTabs(); layout();
+  const strip = $('kbwrap');
+  if (!strip.dataset.placed && strip.scrollWidth > strip.clientWidth + 4) { strip.dataset.placed = 1; strip.scrollLeft = keyEls[12].offsetLeft - 24; }
+}
 // A line read out by screen readers when the view changes, and a description of what the 3D scene is showing
 const announce = (text) => { $('announce').textContent = text; };
 const describeScene = (text) => canvas.setAttribute('aria-label', `${text} Arrow keys turn the view, plus and minus zoom.`);
@@ -1018,7 +1028,7 @@ $('body').addEventListener('scroll', moreCheck);
 $('body').addEventListener('click', (e) => {
   const btn = e.target.closest('button'); if (!btn) return;
   if (btn.dataset.mode) { if (btn.dataset.tab) openTab(btn.dataset.tab, false); if (btn.dataset.stop) cur = +btn.dataset.stop; return setMode(btn.dataset.mode); }
-  if (btn.dataset.menu) return openTunes(true);
+  if (btn.dataset.menu) { enterPlay(); return openTunes(true); }
   if (btn.dataset.nation) { filter.where = filter.where === btn.dataset.nation ? '' : btn.dataset.nation; renderAtlas(-1); return applyFilter(true); }
   if (btn.dataset.visit) { setMode('atlas'); return pickCarillon(CARILLONS.findIndex((c) => c.name === btn.dataset.visit)); }
   if (btn.dataset.more) { listMax += 80; return renderList(); }
@@ -1155,22 +1165,26 @@ canvas.addEventListener('pointerleave', () => { hovered = -1; });
 
 /* ───────────────────────── Layout and render loop ───────────────────────── */
 
+let sizedFor = '';
 function layout() {
   const w = innerWidth, h = innerHeight;
-  renderer.setSize(w, h, false); composer.setSize(w, h);
-  camera.aspect = w / h;
-  // Centre the view in the area not covered by the panel and the keyboard
-  const p = panel.getBoundingClientRect(), k = $('kbwrap').getBoundingClientRect();
-  const wide = w > 820, left = wide ? p.right : 0, top = wide ? 0 : p.bottom;
-  const bottom = mode !== 'tower' ? h : k.top;   // the keyboard is hidden in the atlas
+  if (sizedFor !== w + 'x' + h) {   // resizing the drawing buffers is costly, so only when the window really changed
+    sizedFor = w + 'x' + h;
+    renderer.setSize(w, h, false); composer.setSize(w, h);
+    for (const b of bells) b.wireMat.resolution.set(w, h);
+  }
+  // Centre the view in the part of the screen that is not covered
+  const p = panel.getBoundingClientRect(), k = $('kbwrap').getBoundingClientRect(), t = $('tabbar').getBoundingClientRect();
+  let left = 0, bottom = h;
+  if (w > 820) { left = p.right; if (mode === 'tower') bottom = k.top; }   // guide on the left, batons below
+  else bottom = p.height ? p.top : k.height ? k.top : t.height ? t.top : h;   // upright phone: above the sheet, the batons, or the tab bar
   for (const c of [camera, atlas.camera, site.camera]) {
     c.aspect = w / h;
-    c.setViewOffset(w, h, w / 2 - (left + w) / 2, h / 2 - (top + bottom) / 2, w, h);
+    c.setViewOffset(w, h, w / 2 - (left + w) / 2, h / 2 - bottom / 2, w, h);
     c.updateProjectionMatrix();
   }
-  for (const b of bells) b.wireMat.resolution.set(w, h);
 }
-addEventListener('resize', () => { layout(); moreCheck(); });
+addEventListener('resize', () => { panel.style.height = ''; layout(); moreCheck(); });   // the styles follow the new shape by themselves; this re-centres the scene
 
 // Shadows for every solid thing, then the finishing passes: contact shading in corners, a glow on struck bells, colour grading
 const shellMeshes = [];
@@ -1304,6 +1318,7 @@ const DATED = CARILLONS.map((c, k) => k).filter((k) => CARILLONS[k].yr).sort((x,
 const SEARCH = CARILLONS.map((c) => `${c.name} ${c.city} ${c.country}`.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
 const weight = (t) => t >= 1 ? `${Math.round(t * 10) / 10} tonnes` : `${Math.round(t * 1000)} kg`;
 
+let stepping = false;   // true while Back or Next is choosing the carillon, as opposed to a tap on the globe or the list
 let lastHome = false, lastCard = -1, mode = 'tower', atlasTab = 'towers';
 const filter = { q: '', where: '', min: 0, featured: false, recorded: false };
 let listMax = 80, restoring = true;
@@ -1317,6 +1332,7 @@ const estHz = (kg) => F0 / ((kg / 600) ** (1 / 3) / 1.6) ** (1 / 0.85);   // thi
 function renderAtlas(i) {
   const body = $('body'), keepScroll = lastHome && i < 0;   // switching tabs or filters should not jump
   const focusWas = focusKey(), cameFrom = lastCard;
+  if (i >= 0 && i !== cameFrom && !stepping && mode === 'atlas' && upright() && sheetAt() === 'peek') setSheet('half');   // a tapped tower brings its card up
   lastHome = i < 0;
   stopReal();
   if (i >= 0) stopHistory();
@@ -1550,6 +1566,7 @@ async function loadPhoto(c, i) {
 }
 function atlasStep(d) {   // Back and Next walk through the carillons that pass the filters
   if (!matches.length) return;
+  stepping = true; setTimeout(() => { stepping = false; }, 0);
   const at = matches.indexOf(atlas.selected);
   if (at < 0) return pickCarillon(d > 0 ? matches[0] : -1);
   const to = at + d;
@@ -1557,7 +1574,11 @@ function atlasStep(d) {   // Back and Next walk through the carillons that pass 
 }
 function setMode(m) {
   if (m === mode || (m === 'site' && atlas.selected < 0)) return;
+  const was = mode;
   mode = m;
+  if (m !== 'tower') document.body.classList.remove('play');
+  if (upright()) { if (m === 'site') setSheet('peek'); else if (was === 'site') setSheet('half'); }   // a close-up is for looking, so the sheet gets out of the way
+  syncTabs();
   document.body.classList.toggle('atlas', m !== 'tower');
   document.body.classList.toggle('site', m === 'site');
   stopTune(); game = null; stopHistory(); stopReal();
@@ -1758,17 +1779,66 @@ $('motion').onclick = () => {
   try { localStorage.setItem('carillon-motion', calm ? 'off' : 'on'); } catch (err) { /* private window */ }
 };
 showMotion();
-// Compact screens: the guide panel folds away, and the extra controls live in a menu
-$('fold').onclick = () => {
-  const min = panel.classList.toggle('min');
-  $('fold').textContent = min ? '▾' : '▴'; $('fold').setAttribute('aria-expanded', !min); $('fold').setAttribute('aria-label', min ? 'Show the text' : 'Hide the text');
-  layout();
-};
+/* ───────────────────────── Phone interface ───────────────────────── */
+
+// Upright phones get a tab bar (Tour, Play, Globe) and the guide as a sheet that pulls up from the bottom.
+// The styles do the arranging; this keeps the tab bar, the sheet's height and the scene's framing in step.
 const openMore = (on) => { $('more').classList.toggle('on', on); $('moreBtn').setAttribute('aria-expanded', on); };
 $('moreBtn').onclick = () => { openTunes(false); openMore(!$('more').classList.contains('on')); };
-$('more').addEventListener('click', (e) => { if (e.target.closest('#xray, #recenter')) openMore(false); });   // these change the view, so get out of its way
+
+function syncTabs() {
+  const here = mode !== 'tower' ? 'globe' : document.body.classList.contains('play') ? 'play' : 'tour';
+  for (const b of $('tabbar').children) { if (b.dataset.go === here) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
+}
+function showTab(tab) {
+  openTunes(false); openMore(false);
+  document.body.classList.toggle('play', tab === 'play');
+  if (tab === 'globe') { if (mode !== 'atlas') setMode('atlas'); }
+  else if (mode !== 'tower') setMode('tower');
+  syncTabs(); layout();
+  const strip = $('kbwrap');   // first time the batons appear, start them at C4
+  if (tab === 'play' && !strip.dataset.placed && strip.scrollWidth > strip.clientWidth + 4) { strip.dataset.placed = 1; strip.scrollLeft = keyEls[12].offsetLeft - 24; }
+}
+$('tabbar').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) showTab(b.dataset.go); });
+
+// The sheet: tap its handle to switch between peek and half; drag the handle to any of peek, half or full
+function setSheet(name) {
+  panel.classList.remove('peek', 'full'); if (name !== 'half') panel.classList.add(name);
+  panel.style.height = '';
+  $('fold').setAttribute('aria-label', name === 'peek' ? 'Show the guide' : 'Shrink the guide');
+  layout(); setTimeout(() => { layout(); moreCheck(); }, 280);   // again once the sheet has finished moving
+}
+let drag = null, draggedAt = 0;
+$('fold').addEventListener('pointerdown', (e) => {
+  if (!upright()) return;
+  drag = { y: e.clientY, h: panel.getBoundingClientRect().height, moved: false };
+  try { $('fold').setPointerCapture(e.pointerId); } catch (err) { /* not every pointer can be captured */ }
+});
+$('fold').addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  const up = drag.y - e.clientY;
+  if (Math.abs(up) > 6) drag.moved = true;
+  if (!drag.moved) return;
+  panel.style.transition = 'none'; panel.classList.remove('peek', 'full');
+  panel.style.height = Math.max(110, Math.min(innerHeight - 110, drag.h + up)) + 'px';
+  layout();
+});
+const dropSheet = () => {
+  if (!drag) return;
+  const moved = drag.moved; drag = null; panel.style.transition = '';
+  if (!moved) return;
+  const share = panel.getBoundingClientRect().height / innerHeight;
+  draggedAt = performance.now(); setSheet(share < 0.3 ? 'peek' : share < 0.62 ? 'half' : 'full');
+};
+$('fold').addEventListener('pointerup', dropSheet);
+$('fold').addEventListener('pointercancel', dropSheet);
+$('fold').onclick = () => {
+  if (upright()) { if (performance.now() - draggedAt > 400) setSheet(sheetAt() === 'half' ? 'peek' : 'half'); return; }
+  const min = panel.classList.toggle('min');   // a phone on its side: fold the side panel to its title
+  $('fold').textContent = min ? '▾' : '▴'; $('fold').setAttribute('aria-label', min ? 'Show the text' : 'Hide the text');
+  layout();
+};
 if (touchy) $('atlasHint').textContent = 'Drag to spin · Pinch to zoom · Tap a tower';
-{ const strip = $('kbwrap'); if (strip.scrollWidth > strip.clientWidth + 4) strip.scrollLeft = keyEls[12].offsetLeft - 24; }   // start the phone's batons at C4
 
 $('typing').onclick = () => {
   typing = !typing; showTyping();
