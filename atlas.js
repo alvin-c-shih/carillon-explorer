@@ -284,7 +284,7 @@ window.createAtlas = function ({ THREE, OrbitControls, canvas, data, onSelect, c
     if (sel >= 0 && !trans) {   // up to ten neighbours, fewer the lower the drone flies
       const reach = 7 * DEG * clamp(drone.dist / 3, 0.3, 1.6), here = marks[sel].n;
       near = new Set(marks.filter((m) => m.show && m.i !== sel).map((m) => [m.n.angleTo(here), m]).filter((x) => x[0] < reach)
-        .sort((x, y) => x[0] - y[0]).slice(0, 10).map((x) => x[1]));
+        .sort((x, y) => x[0] - y[0]).slice(0, innerWidth < 820 ? 4 : 10).map((x) => x[1]));   // fewer on a phone
     }
     for (const m of marks) {
       let show = m.i === sel || m.i === hover || (near !== null && near.has(m));
@@ -309,6 +309,7 @@ window.createAtlas = function ({ THREE, OrbitControls, canvas, data, onSelect, c
         if (Math.abs(o.x - l.x) < 190 && l.y - o.y < 22) l.y = o.y + 22;
       }
       l.m.el.style.left = l.x + 'px'; l.m.el.style.top = l.y + 'px';
+      l.m.el.classList.toggle('flip', l.x > w * 0.55);   // near the right edge, open to the left
     });
   }
 

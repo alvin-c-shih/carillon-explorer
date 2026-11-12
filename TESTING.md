@@ -154,7 +154,27 @@ Use the keyboard only for these.
 Not covered, and worth doing with real tools: a screen reader pass (VoiceOver), an automated audit (axe or
 Lighthouse), and colour contrast of text over the 3D scene.
 
-## 9. Performance
+## 9. Phone layout
+
+Emulate an iPhone 16: 393 × 760 upright (the space left by Safari's bars) and 852 × 393 on its side. Reload after
+resizing. On a compact screen the extra controls fold into a ☰ menu and the guide panel has a fold button.
+
+| Check | How | Pass |
+|---|---|---|
+| Controls | Upright, tower | One row above the batons: Play a tune, World atlas, ☰. Nothing overlaps the guide panel or the batons |
+| Menu | Tap ☰ | See inside, Reset view, Copy link, Motion and Sound appear in a box above the row; See inside and Reset view close it |
+| Fold | Tap the arrow at the panel's top right | The panel shrinks to its title and Back / Next; the scene re-centres in the freed space |
+| Batons | Upright | Each natural baton is at least 30 px wide; the strip scrolls sideways and starts at C4 |
+| Play along | Start one upright | The lane of falling notes sits inside the baton panel; notes carry note names, not keyboard letters; the wanted baton scrolls into view |
+| Labels | Stop 3 and a carillon card | Labels near the right edge open to the left; none are cut off; at most five on the globe; none drawn over a panel |
+| Globe | Upright | Tabs, search, pickers and legend fit the width; the hint line sits above the control row |
+| On its side | 852 × 393, tower and globe | Guide on the left, controls in the top right corner, the ☰ box stays clear of the guide |
+| Desktop unchanged | 1280 × 800 | No ☰ and no fold button; controls in a column on the right; batons do not scroll |
+
+Not possible in emulation: real touch (drag, pinch, flick), Safari's moving toolbars, the notch and home bar
+insets, and sound with the ring switch set to silent.
+
+## 10. Performance
 
 ```js
 const gl = carillon.renderer.getContext(); carillon.composer.render(); gl.finish();
@@ -164,7 +184,7 @@ const t = performance.now(); for (let k = 0; k < 20; k++) carillon.composer.rend
 
 Pass: under about 16 ms per frame in the tower. It measured about 6 ms at 2560 × 1600 on the build machine.
 
-## 10. After rebuilding data
+## 11. After rebuilding data
 
 | Rebuilt | Check | Pass |
 |---|---|---|

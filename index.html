@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Carillon Explorer</title>
 <style>
   :root {
@@ -15,6 +15,8 @@
     --wood: #d8b98a;
     --wood-dark: #5a4129;
     --kbh: 152px;
+    /* room for a phone's notch, rounded corners and home bar */
+    --st: env(safe-area-inset-top, 0px); --sb: env(safe-area-inset-bottom, 0px); --sl: env(safe-area-inset-left, 0px); --sr: env(safe-area-inset-right, 0px);
     --lane: 120px;
   }
   * { box-sizing: border-box; }
@@ -22,8 +24,8 @@
     font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--ink); }
   canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 
-  #panel { position: fixed; left: 16px; top: 16px; bottom: calc(var(--kbh) + 28px); width: 350px;
-    background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--line);
+  #panel { position: fixed; left: calc(16px + var(--sl)); top: calc(16px + var(--st)); bottom: calc(var(--kbh) + 28px + var(--sb)); width: 350px;
+    background: var(--panel); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--line);
     border-radius: 14px; padding: 20px 22px 16px; display: flex; flex-direction: column; }
   #eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--bronze); }
   #panel h1 { font: 600 26px/1.15 "Iowan Old Style", Palatino, Georgia, serif; margin: 6px 0 10px; text-wrap: balance; }
@@ -64,7 +66,7 @@
   .stack button.btn span { color: var(--ink-dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
   label.check { display: flex; gap: 8px; align-items: flex-start; color: var(--ink-dim); margin-bottom: 10px; cursor: pointer; }
 
-  #tools { position: fixed; right: 16px; top: 16px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  #tools { position: fixed; right: calc(16px + var(--sr)); top: calc(16px + var(--st)); display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
   #tools button.btn { background: var(--panel); }
   #tools button.btn[aria-pressed="true"] { border-color: var(--bronze); color: var(--bronze); }
   #tunePop { display: none; width: 290px; background: var(--panel); border: 1px solid var(--bronze); border-radius: 10px; padding: 10px 12px 4px; }
@@ -90,8 +92,8 @@
   #atlasLabels div { pointer-events: auto; cursor: pointer; }
   #atlasLabels div.sel { background: var(--bronze); color: #1d1608; font-weight: 600; }
   body.atlas #kbwrap, body.atlas #labels, body.atlas #xray, body.atlas #chip, body.atlas #dots button { display: none !important; }
-  body.atlas #panel { bottom: 16px; }
-  #atlasHint { display: none; position: fixed; bottom: 22px; left: calc(50% + 183px); transform: translateX(-50%); white-space: nowrap;
+  body.atlas #panel { bottom: calc(16px + var(--sb)); }
+  #atlasHint { display: none; position: fixed; bottom: calc(22px + var(--sb)); left: calc(50% + 183px); transform: translateX(-50%); white-space: nowrap;
     background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 16px; font-size: 13px;
     pointer-events: none; transition: opacity .6s; }
   body.atlas #atlasHint { display: block; }
@@ -157,7 +159,7 @@
   .spec dt { color: var(--ink-dim); }
   .spec dd { margin: 0; font-variant-numeric: tabular-nums; }
 
-  #kbwrap { position: fixed; left: 16px; right: 16px; bottom: 14px; height: var(--kbh);
+  #kbwrap { position: fixed; left: calc(16px + var(--sl)); right: calc(16px + var(--sr)); bottom: calc(14px + var(--sb)); height: var(--kbh);
     background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; }
   #kb { position: relative; height: 100%; max-width: 1150px; margin: 0 auto; user-select: none; touch-action: none; }
   .key { position: absolute; border-radius: 999px; cursor: pointer; display: flex; align-items: flex-end;
@@ -179,7 +181,7 @@
   #lane { display: none; position: absolute; left: 0; right: 0; bottom: calc(100% + 11px); height: var(--lane); overflow: hidden; pointer-events: none;
     background: linear-gradient(rgba(20,24,32,0), rgba(20,24,32,.82) 70%); border-bottom: 2px solid var(--bronze); }
   body.song #lane { display: block; }
-  body.song #panel { bottom: calc(var(--kbh) + var(--lane) + 34px); }
+  body.song #panel { bottom: calc(var(--kbh) + var(--lane) + 34px + var(--sb)); }
   .fall { position: absolute; bottom: 0; height: 14px; border-radius: 7px; background: var(--bronze); color: #1d1608;
     font: 700 10px/14px ui-monospace, Menlo, monospace; text-align: center; text-transform: uppercase; }
   .fall.acc { background: rgba(243,236,223,.4); }
@@ -199,20 +201,56 @@
   .row:disabled { cursor: default; color: inherit; }
   .tabs button { font-size: 13px; }
 
-  @media (max-width: 820px) {
-    #panel { right: 16px; width: auto; bottom: auto; max-height: 40vh; padding: 14px 16px 12px; }
-    #panel h1 { font-size: 21px; }
-    #tools { top: auto; bottom: calc(var(--kbh) + 26px); }
-    body.atlas #tools { bottom: 16px; }
-    #atlasHint { left: 50%; bottom: 70px; font-size: 12px; }
-    body.atlas #panel { bottom: auto; max-height: 52vh; }
-    .photo img { height: 110px; }
-    #tools { gap: 6px; left: 16px; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; }
+  /* On large screens the extra controls sit in the column with the rest, and the panel cannot be folded */
+  #panel, #kbwrap { z-index: 3; }   /* panels sit above the labels drawn over the scene */
+  #tools { z-index: 4; }
+  #more { display: contents; }
+  #moreBtn, #fold { display: none; }
+  button, .key, a.btn { touch-action: manipulation; }   /* no double-tap zoom on controls */
+  #nav button { white-space: nowrap; }
+  #labels div.flip, #atlasLabels div.flip { transform: translate(calc(-100% - 8px), -50%); }   /* a label near the right edge opens to the left */
+  #labels div.flip::before, #atlasLabels div.flip::before { left: auto; right: -12px; }
+
+  /* Compact screens (a phone either way up): the extra controls fold into a menu, and the guide panel can be folded */
+  @media (max-width: 820px), (max-height: 500px) {
+    #tools { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; left: calc(16px + var(--sl)); pointer-events: none; }
+    #tools > * { pointer-events: auto; }
+    #tools .btn, #vol { padding: 6px 11px; font-size: 13px; }
+    #moreBtn { display: block; min-width: 40px; }
+    #more { display: none; flex-basis: 100%; flex-wrap: wrap; justify-content: flex-end; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+    #more.on { display: flex; }
+    #tunePop { flex-basis: 100%; width: auto; }
+    #chip { flex-basis: 100%; max-width: none; font-size: 13px; }
+    #vol input { width: 90px; }
+    #fold { display: block; position: absolute; top: 10px; right: 10px; padding: 2px 10px; }
+    #panel.min { bottom: auto !important; max-height: none; }
+    #panel.min #body { display: none; }
+    #panel.min #nav { border-top: 0; padding-top: 4px; }
+    #panel h1 { padding-right: 40px; }
     #pedcap { display: none; }
-    #tools .btn, #vol { padding: 5px 10px; font-size: 13px; }
-    #vol input { width: 56px; }
-    body.song #panel { bottom: auto; }
+    #body .intro { display: none; }
+    #dots button { width: 16px; }
+  }
+  /* A phone held upright: the guide across the top, controls just above the batons, and batons wide enough to tap */
+  @media (max-width: 820px) {
+    #panel { right: calc(16px + var(--sr)); width: auto; bottom: auto; max-height: 38vh; padding: 14px 16px 12px; }
+    #panel h1 { font-size: 21px; }
+    body.atlas #panel { bottom: auto; max-height: 50vh; }
+    body.song #panel { bottom: auto; max-height: 26vh; }
+    .photo img { height: 110px; }
+    #tools { top: auto; bottom: calc(var(--kbh) + 24px + var(--sb)); }
+    body.song #tools { bottom: calc(var(--kbh) + var(--lane) + 24px + var(--sb)); }
+    body.atlas #tools { bottom: calc(16px + var(--sb)); }
+    #more, #tunePop, #chip { order: -1; }   /* menus open above the row of buttons */
+    #atlasHint { left: 50%; bottom: calc(64px + var(--sb)); font-size: 12px; }
     .key i { display: none; }
+    /* The batons are 2.3 screens wide and scroll sideways; the falling-note lane sits inside the same scroller */
+    #kbwrap { padding: 10px 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+    #kbwrap::-webkit-scrollbar { display: none; }
+    #kb { width: 230%; max-width: none; margin: 0 12px; height: calc(var(--kbh) - 22px); }
+    #kb, #kb .key { touch-action: pan-x; }
+    body.song #kbwrap { height: calc(var(--kbh) + var(--lane)); padding-top: calc(10px + var(--lane)); }
+    #lane { background: none; }
   }
   @media (max-height: 700px) {
     :root { --kbh: 128px; --lane: 92px; }
@@ -223,6 +261,16 @@
     button.btn, a.btn { padding: 5px 11px; }
     .photo img { height: 150px; }
   }
+  /* A phone held on its side: short, so everything shrinks a little */
+  @media (max-height: 500px) {
+    :root { --kbh: 108px; --lane: 70px; }
+    #panel { width: 300px; padding: 10px 14px 8px; }
+    #panel h1 { font-size: 18px; margin: 2px 0 6px; }
+    #nav { padding-top: 6px; }
+    #more { order: 1; }
+    #tools { left: auto; max-width: 430px; }   /* stay in the corner, clear of the guide panel */
+    .key i { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -232,6 +280,7 @@
 <div id="atlasHint">Drag to spin · Scroll to zoom · Click a tower to fly there</div>
 
 <aside id="panel" aria-label="Guide">
+  <button class="btn" id="fold" aria-expanded="true" aria-controls="body" aria-label="Hide the text">▴</button>
   <div id="eyebrow"></div>
   <h1 id="title" tabindex="-1"></h1>
   <div id="body"></div>
@@ -246,11 +295,14 @@
   <button class="btn primary" id="tunesBtn" aria-expanded="false">♪ Play a tune</button>
   <div id="tunePop"></div>
   <button class="btn" id="atlasBtn">World atlas</button>
-  <button class="btn" id="xray" aria-pressed="false">See inside</button>
-  <button class="btn" id="recenter">Reset view</button>
-  <button class="btn" id="share">Copy link</button>
-  <button class="btn" id="motion" title="Flights between views and the slow circling of the camera">Motion: on</button>
-  <label class="btn" id="vol">Sound <input type="range" id="volume" min="0" max="100" value="100" aria-label="Volume"></label>
+  <button class="btn" id="moreBtn" aria-expanded="false" aria-controls="more" aria-label="More controls">☰</button>
+  <div id="more">
+    <button class="btn" id="xray" aria-pressed="false">See inside</button>
+    <button class="btn" id="recenter">Reset view</button>
+    <button class="btn" id="share">Copy link</button>
+    <button class="btn" id="motion" title="Flights between views and the slow circling of the camera">Motion: on</button>
+    <label class="btn" id="vol">Sound <input type="range" id="volume" min="0" max="100" value="100" aria-label="Volume"></label>
+  </div>
   <div id="chip"></div>
 </div>
 

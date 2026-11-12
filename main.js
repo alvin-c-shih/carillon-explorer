@@ -680,13 +680,14 @@ const TUNES = {
 
 // One engine plays a tune and drops its notes down the lane above the batons.
 // Listening runs on the clock. Playing along waits at each melody note until the player strikes it.
+const touchy = matchMedia('(pointer: coarse)').matches;
 const lane = document.createElement('div'); lane.id = 'lane'; lane.setAttribute('aria-hidden', 'true');
 // The tune menu is on the Play a tune button at every stop of the tour, not only the last one
 const tuneRows = `<div class="tunes">${Object.entries(TUNES).map(([id, T]) => `<div><span>${T.name}</span><button class="btn" data-tune="${id}">Listen</button>${T.listenOnly ? '' : `<button class="btn primary" data-along="${id}">Play along</button>`}</div>`).join('')}</div>`;
 const tunesBtn = document.getElementById('tunesBtn'), tunePop = document.getElementById('tunePop');
 tunePop.innerHTML = tuneRows + '<p id="tuneNote" aria-live="polite">Listen, or play along: the notes fall onto the batons and the tower waits for you.</p>';
 const openTunes = (on) => { tunePop.classList.toggle('on', on); tunesBtn.setAttribute('aria-expanded', on); };
-tunesBtn.onclick = () => { if (song) stopTune(); else openTunes(!tunePop.classList.contains('on')); };
+tunesBtn.onclick = () => { if (song) return stopTune(); document.getElementById('more').classList.remove('on'); openTunes(!tunePop.classList.contains('on')); };
 tunePop.addEventListener('click', (e) => {
   const btn = e.target.closest('button'); if (!btn) return;
   startSong(btn.dataset.along || btn.dataset.tune, !!btn.dataset.along);
@@ -708,7 +709,7 @@ function startSong(id, along) {
     e.el = document.createElement('div');
     e.el.className = 'fall' + (along && !e.m ? ' acc' : '');
     e.el.style.left = keyEls[e.n].style.left; e.el.style.width = keyEls[e.n].style.width;
-    if (along && e.m) e.el.textContent = HINT[e.n] ?? '';
+    if (along && e.m) e.el.textContent = touchy ? bells[e.n].name : HINT[e.n] ?? '';   // a phone has no keys to name, so name the note
     lane.appendChild(e.el);
   }
   document.body.classList.add('song'); layout();
@@ -726,7 +727,11 @@ function tickSong(now) {
     e.el.style.transform = `translateY(${-y}px)`;
   }
   const want = next && next.t - s.pos < 0.01 ? keyEls[next.n] : null;   // light the baton the lane is waiting for
-  if (want !== s.want) { s.want?.classList.remove('want'); want?.classList.add('want'); s.want = want; }
+  if (want !== s.want) {
+    s.want?.classList.remove('want'); want?.classList.add('want'); s.want = want;
+    const strip = $('kbwrap');   // on a phone the batons scroll sideways: bring the wanted one into view
+    if (want && strip.scrollWidth > strip.clientWidth + 4) strip.scrollTo({ left: want.offsetLeft - strip.clientWidth / 2, behavior: calm ? 'auto' : 'smooth' });
+  }
   if (s.ev.every((e) => e.done) && s.pos > s.ev[s.ev.length - 1].t + 1.2) {
     const n = s.ev.filter((e) => e.m).length, T = TUNES[s.id];
     stopTune();
@@ -1238,6 +1243,7 @@ function frame(now) {
     if (l.set !== STOPS[cur].labels) { l.el.style.display = 'none'; continue; }
     tmp.copy(l.p).project(camera);
     l.el.style.left = (tmp.x + 1) / 2 * innerWidth + 'px';
+    l.el.classList.toggle('flip', tmp.x > 0.1);   // near the right edge, open to the left
     l.el.style.top = (1 - tmp.y) / 2 * innerHeight + 'px';
     l.el.style.display = tmp.z < 1 ? '' : 'none';
   }
@@ -1321,7 +1327,7 @@ function renderAtlas(i) {
     $('title').textContent = 'Where the carillons are';
     const at = (name) => CARILLONS.findIndex((c) => c.name === name);
     const tab = (id, label) => `<button data-tab="${id}" aria-pressed="${atlasTab === id}">${label}</button>`;
-    let html = `<p><b>${CARILLONS.length}</b> of the world's roughly 700 carillons are on this globe, coloured by country. Two thirds are in the Netherlands, Belgium and the USA.</p>
+    let html = `<p class="intro"><b>${CARILLONS.length}</b> of the world's roughly 700 carillons are on this globe, coloured by country. Two thirds are in the Netherlands, Belgium and the USA.</p>
 <div class="tabs">${tab('towers', 'Towers')}${tab('history', 'History')}${tab('records', 'Records')}${tab('cost', 'Cost')}${tab('quiz', 'Quiz')}</div>`;
     if (atlasTab === 'towers') {
       const count = (key) => CARILLONS.reduce((map, c) => map.set(c[key], (map.get(c[key]) || 0) + 1), new Map());
@@ -1752,6 +1758,18 @@ $('motion').onclick = () => {
   try { localStorage.setItem('carillon-motion', calm ? 'off' : 'on'); } catch (err) { /* private window */ }
 };
 showMotion();
+// Compact screens: the guide panel folds away, and the extra controls live in a menu
+$('fold').onclick = () => {
+  const min = panel.classList.toggle('min');
+  $('fold').textContent = min ? '▾' : '▴'; $('fold').setAttribute('aria-expanded', !min); $('fold').setAttribute('aria-label', min ? 'Show the text' : 'Hide the text');
+  layout();
+};
+const openMore = (on) => { $('more').classList.toggle('on', on); $('moreBtn').setAttribute('aria-expanded', on); };
+$('moreBtn').onclick = () => { openTunes(false); openMore(!$('more').classList.contains('on')); };
+$('more').addEventListener('click', (e) => { if (e.target.closest('#xray, #recenter')) openMore(false); });   // these change the view, so get out of its way
+if (touchy) $('atlasHint').textContent = 'Drag to spin · Pinch to zoom · Tap a tower';
+{ const strip = $('kbwrap'); if (strip.scrollWidth > strip.clientWidth + 4) strip.scrollLeft = keyEls[12].offsetLeft - 24; }   // start the phone's batons at C4
+
 $('typing').onclick = () => {
   typing = !typing; showTyping();
   try { localStorage.setItem('carillon-typing', typing ? 'on' : 'off'); } catch (err) { /* private window */ }
